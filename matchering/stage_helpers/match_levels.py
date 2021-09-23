@@ -33,6 +33,7 @@ def normalize_reference(reference: np.ndarray, config: Config) -> (np.ndarray, f
         reference, config.threshold, config.min_value, normalize_clipped=False
     )
 
+
     if np.isclose(final_amplitude_coefficient, 1.0):
         debug("The REFERENCE was not changed. There is no final amplitude coefficient")
     else:

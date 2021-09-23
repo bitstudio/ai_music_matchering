@@ -18,6 +18,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
+from typing import List, final
 import numpy as np
 from .log import Code, info, debug, debug_line
 from . import Config
@@ -36,7 +37,7 @@ from .limiter import limit
 
 
 def __match_levels(
-    target: np.ndarray, reference: np.ndarray, config: Config
+    target: np.ndarray, reference: np.ndarray or tuple, config: Config
 ) -> (
     np.ndarray,
     np.ndarray,
@@ -56,8 +57,6 @@ def __match_levels(
         f"or {config.max_piece_size / config.internal_sample_rate:.2f} seconds"
     )
 
-    reference, final_amplitude_coefficient = normalize_reference(reference, config)
-
     (
         target_mid,
         target_side,
@@ -68,14 +67,20 @@ def __match_levels(
         target_piece_size,
     ) = analyze_levels(target, "target", config)
 
-    (
-        reference_mid,
-        reference_side,
-        reference_mid_loudest_pieces,
-        reference_side_loudest_pieces,
-        reference_match_rms,
-        *_,
-    ) = analyze_levels(reference, "reference", config)
+    if isinstance(reference,tuple):
+        final_amplitude_coefficient, reference_mid_loudest_pieces,reference_side_loudest_pieces,reference_match_rms = reference
+    else:
+
+        reference, final_amplitude_coefficient = normalize_reference(reference, config)
+
+        (
+            reference_mid,
+            reference_side,
+            reference_mid_loudest_pieces,
+            reference_side_loudest_pieces,
+            reference_match_rms,
+            *_,
+        ) = analyze_levels(reference, "reference", config)
 
     rms_coefficient, target_mid, target_side = get_rms_c_and_amplify_pair(
         target_mid,
@@ -112,15 +117,16 @@ def __match_frequencies(
     target_side_loudest_pieces: np.ndarray,
     reference_side_loudest_pieces: np.ndarray,
     config: Config,
+    is_ref_params_already_fft: bool = True
 ) -> (np.ndarray, np.ndarray):
     debug_line()
     info(Code.INFO_MATCHING_FREQS)
 
     mid_fir = get_fir(
-        target_mid_loudest_pieces, reference_mid_loudest_pieces, "mid", config
+        target_mid_loudest_pieces, reference_mid_loudest_pieces, "mid", config, is_ref_input_already_ftt=is_ref_params_already_fft
     )
     side_fir = get_fir(
-        target_side_loudest_pieces, reference_side_loudest_pieces, "side", config
+        target_side_loudest_pieces, reference_side_loudest_pieces, "side", config, is_ref_input_already_ftt=is_ref_params_already_fft
     )
 
     del (
@@ -209,12 +215,15 @@ def __finalize(
 
 def main(
     target: np.ndarray,
-    reference: np.ndarray,
+    reference: np.ndarray or tuple,
     config: Config,
     need_default: bool = True,
     need_no_limiter: bool = False,
     need_no_limiter_normalized: bool = False,
 ) -> (np.ndarray, np.ndarray, np.ndarray):
+
+    is_ref_params_already_fft=isinstance(reference, tuple)
+
     (
         target_mid,
         target_side,
@@ -238,6 +247,7 @@ def main(
         target_side_loudest_pieces,
         reference_side_loudest_pieces,
         config,
+        is_ref_params_already_fft=is_ref_params_already_fft
     )
 
     del (

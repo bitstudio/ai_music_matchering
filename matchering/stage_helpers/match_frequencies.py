@@ -80,15 +80,23 @@ def get_fir(
     reference_loudest_pieces: np.ndarray,
     name: str,
     config: Config,
+    is_ref_input_already_ftt: bool = True
 ) -> np.ndarray:
     debug(f"Calculating the {name} FIR for the matching EQ...")
 
     target_average_fft = __average_fft(
         target_loudest_pieces, config.internal_sample_rate, config.fft_size
     )
-    reference_average_fft = __average_fft(
-        reference_loudest_pieces, config.internal_sample_rate, config.fft_size
-    )
+
+    if is_ref_input_already_ftt:
+        reference_average_fft = reference_loudest_pieces
+    else:
+        reference_average_fft = __average_fft(
+            reference_loudest_pieces, config.internal_sample_rate, config.fft_size
+        )
+
+    with open("test.txt","a") as f:
+        f.write(","+str(reference_average_fft))
 
     np.maximum(config.min_value, target_average_fft, out=target_average_fft)
     matching_fft = reference_average_fft / target_average_fft

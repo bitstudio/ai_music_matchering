@@ -25,6 +25,6 @@ __version__ = "2.0.3"
 from .log.handlers import set_handlers as log
 from .results import Result, pcm16, pcm24
 from .defaults import Config
-from .core import process
+from .core import process, get_ref_parameters, extract_ref_wav_parameters_from_root
 from .loader import load
 from .checker import check
