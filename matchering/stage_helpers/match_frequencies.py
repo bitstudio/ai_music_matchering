@@ -95,9 +95,6 @@ def get_fir(
             reference_loudest_pieces, config.internal_sample_rate, config.fft_size
         )
 
-    with open("test.txt","a") as f:
-        f.write(","+str(reference_average_fft))
-
     np.maximum(config.min_value, target_average_fft, out=target_average_fft)
     matching_fft = reference_average_fft / target_average_fft
 
