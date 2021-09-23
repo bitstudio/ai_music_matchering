@@ -18,7 +18,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
-from typing import List, final
+from typing import List
 import numpy as np
 from .log import Code, info, debug, debug_line
 from . import Config
